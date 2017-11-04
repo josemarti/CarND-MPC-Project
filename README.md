@@ -1,3 +1,76 @@
+# CarND-Controls-MPC - Jose C. Marti
+## Self-Driving Car Engineer Nanodegree Program.
+
+This is the 5th and last project of the Term 2. In this project I have implemented a MPC controller in C++. The goal is to control the steering of the vehicle in the simulator and successfully drive at least a lap around the track.
+This time, in order to better simulate a real environment, a 100ms delay is added to the simulator. Vehicle kinematic model is used to approximate to a real car behavior. The program evaluates the errors (cost) in order to optimize the route along the track in the simulator, taking in to account the model constrains.
+Udacity provides some starting coding and this has been also complemented with the code from the course’s Quizzes.
+
+
+## Your code should compile.	
+
+The code compiles without errors with cmake and make.
+
+
+## The Model
+*Student describes their model in detail. This includes the state, actuators and update equations.*
+
+The kinematic model is based on CRTV (Constant Rate of Turn and Velocity). Complex interactions between the tires and the road are ignored.
+It takes into account the coordinates angle (psi) and velocity (v).
+The error is also considered: the cross-track error (cte) and psi error (epsi).
+The output of the model are: the actuator’s acceleration (a) and delta (steering angle).
+Information from previous timestep is considered for the calculation.
+
+```
+x_[t+1] = x[t] + v[t] * cos(psi[t]) * dt
+y_[t+1] = y[t] + v[t] * sin(psi[t]) * dt
+psi_[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
+v_[t+1] = v[t] + a[t] * dt
+cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
+epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+```
+If delta is positive we rotate counter-clockwise, or turn left. In the simulator however, a positive value implies a right turn and a negative value implies a left turn. Sign was changed in epsi and psi equations in the code.
+Lf is the distance between the car CoG and the front wheels.
+
+
+## Timestep Length and Elapsed Duration (N & dt)
+*Student discusses the reasoning behind the chosen N (timestep length) and dt (elapsed duration between timesteps) values.*
+
+The prediction horizon is defined by the number of points (N) and the time interval (dt). The chosen values for N and dt are 12 and 0.1, respectively. Many combinations were used. I tried to perform a long horizon with a high number of points but the simulator behaved slowly so I ended up decreasing the number down to 12.
+In the same way the time interval has to be big enough for prediction and small enough to provide accurate planning.
+
+
+## Polynomial Fitting and MPC Preprocessing.
+*A polynomial is fitted to waypoints. If the student preprocesses waypoints, the vehicle state, and/or actuators prior to the MPC procedure it is described.*
+
+The waypoints are converted from map coordinates to car coordinates. This way the coordinates of the vehicle are now located on the origin. Afterwards, a polynomial is defined to fit in the waypoints (polyfit function). The coefficients of the polynomial are used to calculate the errors and create the reference trajectory. 
+
+
+## Model Predictive Control with Latency
+*The student implements Model Predictive Control that handles a 100 millisecond latency.*
+
+The model and the delay interval were used to calculate the state values, in order to handle the delay. 
+
+
+## Simulation
+
+The vehicle successfully drives a lap around the track.
+
+![pic](snap.png)
+
+## Conclusion
+
+This project is probably the most complex I have done so far in the Self driving Car Nanodegree. 
+The use of additional libraries (as IPOPT and CPPAD to calculate an optimal trajectory) and its associated actuation commands, makes this project harder to implement if you are not familiar with them. 
+
+Course lessons are complete and they accomplish the educational purpose of understanding the MPC mechanics. However, once you try to translate this knowledge in to a piece of code things turn out to be a bit more difficult.
+The good thing is that the Quizzes and the Udacity walkthrough is very helpful (and key) to successfully accomplish this project.
+
+J.C. Marti
+
+
+
+
+-------------
 # CarND-Controls-MPC
 Self-Driving Car Engineer Nanodegree Program
 
